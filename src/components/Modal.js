@@ -35,6 +35,7 @@ const ModalContent = styled.div`
   }
 `
 
+
 function Modal() {
     const [error, setError] = useState("")
     const [isModal, setIsModal] = useState(false)

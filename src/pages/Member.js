@@ -101,6 +101,7 @@ function Member() {
   const [eye, setEye] = useState([0,0])
   const [isModal, setIsModal] = useState(false)
   const navigate = useNavigate()
+  
 
   const toggleEye = (index) => {
     const newEye = [...eye]
