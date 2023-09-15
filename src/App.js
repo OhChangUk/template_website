@@ -1,14 +1,15 @@
 import { Route, Routes } from "react-router-dom";
 import GlobalStyle from "./components/GlobalStyle";
-import Main from "./pages/Main";
+// import Main from "./pages/Main";
 import Aside from "./components/Aside";
 import { ThemeProvider } from "styled-components";
-import { useState } from "react";
+// import { useState } from "react";
 import Nav from "./components/Nav";
 import store from "./store";
 import { Provider, useSelector } from "react-redux";
 import Member from "./pages/Member";
 import Login from "./pages/Login";
+import Example from "./example/Example";
 
 
 
@@ -57,7 +58,8 @@ function Inner(){
       <Aside/>
       <Nav/>
       <Routes>
-        <Route path="/" element={<Main />} />
+        {/* <Route path="/" element={<Main />} /> */}
+        <Route path="/" element={<Example />} />
         <Route path="/member" element={<Member />} />
         <Route path="/login" element={<Login />} />
       </Routes>
