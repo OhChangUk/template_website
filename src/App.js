@@ -10,6 +10,8 @@ import { Provider, useSelector } from "react-redux";
 import Member from "./pages/Member";
 import Login from "./pages/Login";
 import Example from "./example/Example";
+import Logout from "./pages/Logout";
+import Main from "./pages/Main";
 
 
 
@@ -49,6 +51,8 @@ function Inner(){
   
   const theme = useSelector(state => state.dark)
   const DarkMode = theme === 'light' ? light : dark
+  const userState = useSelector(state => state.user)
+  console.log(userState)
 
 
 
@@ -56,12 +60,13 @@ function Inner(){
     <ThemeProvider theme={DarkMode}>
       <GlobalStyle />
       <Aside/>
-      <Nav/>
+      <Nav />
       <Routes>
-        {/* <Route path="/" element={<Main />} /> */}
-        <Route path="/" element={<Example />} />
+        <Route path="/" element={<Main />} />
+        {/* <Route path="/" element={<Example />} /> */}
         <Route path="/member" element={<Member />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/logout" element={<Logout />} />
       </Routes>
     </ThemeProvider>
   )

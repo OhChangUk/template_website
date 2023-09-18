@@ -2,6 +2,9 @@ import React, { useState } from 'react'
 import { styled } from 'styled-components'
 import { firebaseAuth, signInWithEmailAndPassword } from '../firebase'
 import {useNavigate} from 'react-router-dom'
+import { collection, doc, getDoc, getFirestore } from 'firebase/firestore'
+import { logIn, loggedIn } from '../store'
+import { useDispatch } from 'react-redux'
 
 
 const Container = styled.div`
@@ -69,6 +72,7 @@ function Login() {
   const [password, setPassword] = useState()
   const [error, setError] = useState()
   const navigate = useNavigate()
+  const dispatch = useDispatch()
 
   const errorMsg = (errorCode) => {
     const firebaseError = {
@@ -86,6 +90,18 @@ function Login() {
       // console.log(userLogin)
       const user = userLogin.user;
       console.log(user)
+      sessionStorage.setItem("users", user.uid)
+      dispatch(logIn(user.uid))
+
+      const userDoc = doc(collection(getFirestore(), "users"), user.uid)
+      // collection - 하나의 데이터를 가져오겠다.
+      const userDocSnapshot = await getDoc(userDoc)
+      // Doc - Document 줄임말
+      if(userDocSnapshot.exists()){
+        const userData = userDocSnapshot.data()
+        dispatch(loggedIn(userData))
+        navigate(-1)
+      }
     }catch(error){
       setError(errorMsg(error.code))
       console.log(error.code)

@@ -4,7 +4,7 @@ import { createUserWithEmailAndPassword, firebaseAuth } from './../firebase'
 import {doc, setDoc, getFirestore} from 'firebase/firestore'
 import { useNavigate } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faEye, faEyeSlash, faTriangleExclamation } from '@fortawesome/free-solid-svg-icons'
+import { faEye, faEyeSlash} from '@fortawesome/free-solid-svg-icons' // faTriangleExclamation
 import Modal from '../components/Modal'
 
 
@@ -64,30 +64,7 @@ const Password = styled.div`
   }
 `
 
-const ModalBackground = styled.div`
-  position: fixed;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background-color: rgba(0,0,0,0.7);
-  z-index: 9999;
-  display: flex; justify-content: center; align-items: center;
-`
-const ModalContent = styled.div`
-  flex-basis: 360px;
-  background-color: #fff;
-  padding: 60px 20px 40px;
-  border-radius: 8px;
-  display: flex; justify-content: center;
-  flex-wrap:wrap;
-  >svg{
-    flex-basis: 100%;
-    font-size: 80px;
-    color: red;
-  }
-  >p{
-    font-size: 16px;
-    font-weight: bold; margin: 24px 0;
-  }
-`
+
 
 
 function Member() {
@@ -184,7 +161,7 @@ function Member() {
     <>
       {
         isModal &&
-        <Modal />
+        <Modal error={error}  onClose={()=>{setIsModal(false)}}/> //isModal={isModal} setIsModal={setIsModal}
       }
       <Container>
         <SignUp>
@@ -199,8 +176,8 @@ function Member() {
             <FontAwesomeIcon icon={eye[0] ? faEye : faEyeSlash} onClick={()=>{toggleEye(0)}}/>
           </Password>
           <Password>
-            <Input onChange={(e) => {setPasswordConfirm(e.target.value)}} type={eye[0] ? 'text' : 'password'} className='confirm_password' placeholder='비밀번호 확인' />
-            <FontAwesomeIcon icon={eye[0] ? faEye : faEyeSlash} onClick={()=>{toggleEye(0)}}/>
+            <Input onChange={(e) => {setPasswordConfirm(e.target.value)}} type={eye[1] ? 'text' : 'password'} className='confirm_password' placeholder='비밀번호 확인' />
+            <FontAwesomeIcon icon={eye[1] ? faEye : faEyeSlash} onClick={()=>{toggleEye(1)}}/>
           </Password>
           <Button onClick={signUp}>가입</Button>
         </SignUp>
