@@ -6,8 +6,9 @@ import { useNavigate } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEye, faEyeSlash} from '@fortawesome/free-solid-svg-icons' // faTriangleExclamation
 import Modal from '../components/Modal'
-
-
+import { useDispatch, useSelector } from 'react-redux'
+import { logIn } from '../store'
+// import { useEffect } from 'react'
 
 const Container = styled.div`
   display: flex;
@@ -73,11 +74,12 @@ function Member() {
   const [password, setPassword] = useState("")
   const [passwordConfirm, setPasswordConfirm] = useState("")
   const [nickname, setNickname] = useState("")
-  const [phone, setPhone] = useState("")
+  const [phoneNumber, setPhoneNumber] = useState("")
   const [error, setError] = useState("")
   const [eye, setEye] = useState([0,0])
   const [isModal, setIsModal] = useState(false)
   const navigate = useNavigate()
+  const dispatch = useDispatch()
   
 
   const toggleEye = (index) => {
@@ -90,7 +92,7 @@ function Member() {
     // 그리고 그 값을 쓰기 전용인 setEye에 새로운 배열값을 저장한다.
   }
 
-  const phoneNumber = (e) => {
+  const PhoneNumber = (e) => {
     let value = e.target.value;
 
     e.target.value = e.target.value.replace(/[^0-9]/g, '').replace(/^(\d{0,3})(\d{0,4})(\d{0,4})$/g, '$1-$2-$3').replace(/-{1,2}$/g,"")
@@ -98,11 +100,11 @@ function Member() {
 
     // let value = e.target.value;
     // e.target.value = e.target.value.replace(/[^0-9]/g, '').replace(/^(\d{0,3})(\d{0,4})(\d{0,4})$/g, "$1-$2-$3").replace(/-{1,2}$/g, "");
-    setPhone(value)
+    setPhoneNumber(value)
 }
-  const isValidPhone = (phone) => {
+  const isValidPhone = (phoneNumber) => {
     const regex = /^01[0-9]-[0-9]{3,4}-[0-9]{4}$/
-    return regex.test(phone)
+    return regex.test(phoneNumber)
   }
   const isValidEmail = (email) =>{
     const regex = /^[A-Za-z0-9]([-_.]?[A-Za-z0-9])*@[A-Za-z0-9]([-_.]?[A-Za-z0-9])*\.[A-Za-z]{2,3}$/
@@ -116,7 +118,7 @@ function Member() {
       errorMessage = "이름"
     }else if(nickname.length === 0){
       errorMessage = "닉네임"
-    }else if(!isValidPhone(phone)){
+    }else if(!isValidPhone(phoneNumber)){
       setError("유효한 전화번호를 입력해주세요.")
       setIsModal(!isModal)
       return
@@ -143,10 +145,13 @@ function Member() {
       const userProfile = {
         name,
         nickname,
-        phone
+        phoneNumber,
+        email
       }
 
       await setDoc(doc(getFirestore(), "users", user.uid), userProfile)
+      sessionStorage.setItem("users", user.uid)
+      dispatch(logIn(user.uid))
       alert("회원가입이 완료되었습니다.")
       navigate('/')
     }catch(error){
@@ -155,6 +160,9 @@ function Member() {
       console.log(error.code)
     }
   }
+  const userState = useSelector(state => state.user)
+  console.log(userState.loggedIn)
+  
   
 
   return (
@@ -163,25 +171,28 @@ function Member() {
         isModal &&
         <Modal error={error}  onClose={()=>{setIsModal(false)}}/> //isModal={isModal} setIsModal={setIsModal}
       }
-      <Container>
-        <SignUp>
-          <Title>회원가입</Title>
-          {phone}
-          <Input value={name} onChange={(e) => {setName(e.target.value)}} type='text' className='name' placeholder='이름' />
-          <Input value={nickname} onChange={(e) => {setNickname(e.target.value)}} type='text' className='nickname' placeholder='닉네임' />
-          <Input onInput={phoneNumber} maxLength={13} type='text' className='phone' placeholder='전화번호' />
-          <Input onChange={(e) => {setEmail(e.target.value)}} type='email' className='email' placeholder='이메일' />
-          <Password>
-            <Input onChange={(e) => {setPassword(e.target.value)}} type={eye[0] ? 'text' : 'password'} className='password' placeholder='비밀번호' />
-            <FontAwesomeIcon icon={eye[0] ? faEye : faEyeSlash} onClick={()=>{toggleEye(0)}}/>
-          </Password>
-          <Password>
-            <Input onChange={(e) => {setPasswordConfirm(e.target.value)}} type={eye[1] ? 'text' : 'password'} className='confirm_password' placeholder='비밀번호 확인' />
-            <FontAwesomeIcon icon={eye[1] ? faEye : faEyeSlash} onClick={()=>{toggleEye(1)}}/>
-          </Password>
-          <Button onClick={signUp}>가입</Button>
-        </SignUp>
-      </Container>
+      {
+        userState.loggedIn === true ? <Modal error="이미 로그인 중입니다." onClose={()=>{navigate('/')}} /> : 
+        <Container>
+          <SignUp>
+            <Title>회원가입</Title>
+            {phoneNumber}
+            <Input value={name} onChange={(e) => {setName(e.target.value)}} type='text' className='name' placeholder='이름' />
+            <Input value={nickname} onChange={(e) => {setNickname(e.target.value)}} type='text' className='nickname' placeholder='닉네임' />
+            <Input onInput={PhoneNumber} maxLength={13} type='text' className='phone' placeholder='전화번호' />
+            <Input onChange={(e) => {setEmail(e.target.value)}} type='email' className='email' placeholder='이메일' />
+            <Password>
+              <Input onChange={(e) => {setPassword(e.target.value)}} type={eye[0] ? 'text' : 'password'} className='password' placeholder='비밀번호' />
+              <FontAwesomeIcon icon={eye[0] ? faEye : faEyeSlash} onClick={()=>{toggleEye(0)}}/>
+            </Password>
+            <Password>
+              <Input onChange={(e) => {setPasswordConfirm(e.target.value)}} type={eye[1] ? 'text' : 'password'} className='confirm_password' placeholder='비밀번호 확인' />
+              <FontAwesomeIcon icon={eye[1] ? faEye : faEyeSlash} onClick={()=>{toggleEye(1)}}/>
+            </Password>
+            <Button onClick={signUp}>가입</Button>
+          </SignUp>
+        </Container>
+      }
     </>
   )
 }
