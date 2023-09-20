@@ -1,10 +1,9 @@
 import React from 'react'
-import { collection, query, where, getDoc, getFirestore, getDocs } from 'firebase/firestore'
+import { collection, query, where, getFirestore, getDocs } from 'firebase/firestore'
 import { firebaseAuth, sendPasswordResetEmail } from '../firebase'
 import { styled } from 'styled-components'
 import Modal from '../components/Modal'
 import { useState } from 'react'
-import { useSelector } from 'react-redux'
 
 
 const Container = styled.div`
@@ -86,7 +85,7 @@ function Findemail() {
   const [message, setMessage] = useState("")
   const [resultEmail, setResultEmail] = useState("")
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isModal, setIsModal] = useState(false)
+  
 
   const PhoneNumber = (e) => {
     let value = e.target.value;
@@ -158,13 +157,10 @@ function Findemail() {
         return
     })
   }
-  const userState = useSelector(state => state.user)
-  console.log(userState.loggedIn)
+  
 
   return (
     <>
-      {
-        userState.loggedIn === false ? "로그인이 필요한 서비스입니다." :
         <Container>
             <FindMail>
                 <Title>이메일 및 비밀번호 재설정</Title>
@@ -183,7 +179,6 @@ function Findemail() {
                 {resultEmail && <Button onClick={passwordEdit}>패스워드 재설정</Button>}
             </FindMail>
         </Container>
-        }
         {
             isModalOpen &&
             <Modal error={message} onClose={()=>{setIsModalOpen(false)}} />
