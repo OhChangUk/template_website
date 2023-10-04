@@ -1,4 +1,4 @@
-import { Route, Routes, useNavigate } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import GlobalStyle from "./components/GlobalStyle";
 // import Main from "./pages/Main";
 import Aside from "./components/Aside";
@@ -14,7 +14,7 @@ import Logout from "./pages/Logout";
 import Main from "./pages/Main";
 import { useEffect } from "react";
 import { collection, doc, getDoc, getFirestore } from "firebase/firestore";
-import Modify from "./pages/Modify";
+// import Modify from "./pages/Modify";
 import Findemail from "./pages/Findemail";
 import Write from "./pages/Write";
 import Service from "./pages/Service";
@@ -23,8 +23,8 @@ import Online from "./pages/service/Online";
 import Qna from "./pages/service/Qna";
 import Gallery from "./pages/service/Gallery";
 import View from "./pages/View";
-import { useState } from "react";
-import Modal from "./components/Modal";
+// import { useState } from "react";
+// import Modal from "./components/Modal";
 import Notpage from "./pages/Notpage";
 
 
@@ -93,8 +93,8 @@ function Inner(){
     fetchUser()
   },[dispatch, uid])
 
-  const[isModal, setIsModal] = useState(true)
-  const navigate = useNavigate()
+  // const[isModal, setIsModal] = useState(true)
+  // const navigate = useNavigate()
 
   return(
     <ThemeProvider theme={DarkMode}>
@@ -107,7 +107,7 @@ function Inner(){
         <Route path="/member" element={<Member />} />
         <Route path="/login" element={<Login />} />
         <Route path="/logout" element={<Logout />} />
-        <Route path="/modify" element={<Modify />} />
+        <Route path="/modify" element={<Member />} />
         <Route path="/findemail" element={<Findemail />} />
         <Route path="/write/:board" element={<Write />} />
         <Route path="/view/:board/:view" element={<View />} />

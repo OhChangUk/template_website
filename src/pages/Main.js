@@ -1,13 +1,13 @@
 import React from 'react'
-// import { useDispatch, useSelector } from 'react-redux'
-// import { changeName } from '../store'
+import Banner from '../components/home/Banner'
+
+
 
 function Main() {
 
-
   return (
     <>
-      <div className=""></div>
+      <Banner />
     </>
   )
 }

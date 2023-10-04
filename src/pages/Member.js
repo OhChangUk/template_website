@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { styled } from 'styled-components'
 import { createUserWithEmailAndPassword, firebaseAuth } from './../firebase'
-import {doc, setDoc, getFirestore} from 'firebase/firestore'
+import {doc, setDoc, getFirestore, getDoc, updateDoc} from 'firebase/firestore'
 import { useNavigate } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEye, faEyeSlash} from '@fortawesome/free-solid-svg-icons' // faTriangleExclamation
@@ -80,6 +80,37 @@ function Member() {
   const [isModal, setIsModal] = useState(false)
   const navigate = useNavigate()
   const dispatch = useDispatch()
+  const [userUid, setUserUid] = useState("")
+
+  const initialMode = window.location.pathname.includes("member")
+
+  useEffect(()=>{
+    if(!initialMode){
+      firebaseAuth.onAuthStateChanged((user)=>{
+        if(user){
+          setUserUid(user.uid)
+        }
+      })
+      // 인증된 정보를 초기화해서 다시 가져오겠다는 함수
+    }
+  },[initialMode])
+
+  useEffect(()=>{
+    if(!initialMode && userUid){
+      const fetchUserData = async ()=>{
+        const userRef = doc(getFirestore(), "users", userUid)
+        const userSnap = await getDoc(userRef)
+        if(userSnap.exists()){
+          const data = userSnap.data()
+          setName(data.name)
+          setNickname(data.nickname)
+          setPhoneNumber(data.phoneNumber)
+          setEmail(data.email)
+        }
+      }
+      fetchUserData()
+    }
+  }, [initialMode,userUid])
   
 
   const toggleEye = (index) => {
@@ -126,11 +157,11 @@ function Member() {
       setError("유효한 이메일을 입력해주세요.")
       setIsModal(!isModal)
       return
-    }else if(password.length === 0){
+    }else if(password.length === 0 && initialMode){
       errorMessage = "비밀번호"
-    }else if(passwordConfirm.length === 0){
+    }else if(passwordConfirm.length === 0 && initialMode){
       errorMessage = "비밀번호 확인"
-    }else if(password !== passwordConfirm){
+    }else if(password !== passwordConfirm && initialMode){
       setError("비밀번호가 일치하지 않습니다.")
       setIsModal(!isModal)
     }
@@ -140,19 +171,31 @@ function Member() {
       return
     }
     try{
-      const {user} = await createUserWithEmailAndPassword(firebaseAuth, email, password)
-
+      
       const userProfile = {
         name,
         nickname,
         phoneNumber,
         email
       }
-
-      await setDoc(doc(getFirestore(), "users", user.uid), userProfile)
-      sessionStorage.setItem("users", user.uid)
-      dispatch(logIn(user.uid))
-      alert("회원가입이 완료되었습니다.")
+      
+      if(initialMode){
+        const {user} = await createUserWithEmailAndPassword(firebaseAuth, email, password)
+        await setDoc(doc(getFirestore(), "users", user.uid), userProfile)
+        sessionStorage.setItem("users", user.uid)
+        dispatch(logIn(user.uid))
+        alert("회원가입이 완료되었습니다.")
+      }else{
+        if(userUid){
+          const userRef = doc(getFirestore(), "users", userUid)
+          await updateDoc(userRef, userProfile)
+          alert("정보수정이 완료되었습니다.")
+        }else{
+          setError("회원정보가 없습니다.")
+          setIsModal(!isModal)
+          return
+        }
+      }
       navigate('/')
     }catch(error){
       setError(errorMsg(error.code))
@@ -172,24 +215,29 @@ function Member() {
         <Modal error={error}  onClose={()=>{setIsModal(false)}}/> //isModal={isModal} setIsModal={setIsModal}
       }
       {
-        userState.loggedIn === true ? <Modal error="이미 로그인 중입니다." onClose={()=>{navigate('/')}} /> : 
+        userState.loggedIn && initialMode ? <Modal error="이미 로그인 중입니다." onClose={()=>{navigate('/')}} /> : 
         <Container>
           <SignUp>
-            <Title>회원가입</Title>
+            <Title>{initialMode ? "회원가입" : "정보수정"}</Title>
             {phoneNumber}
-            <Input value={name} onChange={(e) => {setName(e.target.value)}} type='text' className='name' placeholder='이름' />
-            <Input value={nickname} onChange={(e) => {setNickname(e.target.value)}} type='text' className='nickname' placeholder='닉네임' />
-            <Input onInput={PhoneNumber} maxLength={13} type='text' className='phone' placeholder='전화번호' />
-            <Input onChange={(e) => {setEmail(e.target.value)}} type='email' className='email' placeholder='이메일' />
-            <Password>
-              <Input onChange={(e) => {setPassword(e.target.value)}} type={eye[0] ? 'text' : 'password'} className='password' placeholder='비밀번호' />
-              <FontAwesomeIcon icon={eye[0] ? faEye : faEyeSlash} onClick={()=>{toggleEye(0)}}/>
-            </Password>
-            <Password>
-              <Input onChange={(e) => {setPasswordConfirm(e.target.value)}} type={eye[1] ? 'text' : 'password'} className='confirm_password' placeholder='비밀번호 확인' />
-              <FontAwesomeIcon icon={eye[1] ? faEye : faEyeSlash} onClick={()=>{toggleEye(1)}}/>
-            </Password>
-            <Button onClick={signUp}>가입</Button>
+            <Input defaultValue={name} onChange={(e) => {setName(e.target.value)}} type='text' className='name' placeholder='이름' />
+            <Input defaultValue={nickname} onChange={(e) => {setNickname(e.target.value)}} type='text' className='nickname' placeholder='닉네임' />
+            <Input defaultValue={phoneNumber} onInput={PhoneNumber} maxLength={13} type='text' className='phone' placeholder='전화번호' />
+            <Input defaultValue={email} onChange={(e) => {setEmail(e.target.value)}} type='email' className='email' placeholder='이메일' />
+            {
+              initialMode &&
+              <>
+                <Password>
+                  <Input onChange={(e) => {setPassword(e.target.value)}} type={eye[0] ? 'text' : 'password'} className='password' placeholder='비밀번호' />
+                  <FontAwesomeIcon icon={eye[0] ? faEye : faEyeSlash} onClick={()=>{toggleEye(0)}}/>
+                </Password>
+                <Password>
+                  <Input onChange={(e) => {setPasswordConfirm(e.target.value)}} type={eye[1] ? 'text' : 'password'} className='confirm_password' placeholder='비밀번호 확인' />
+                  <FontAwesomeIcon icon={eye[1] ? faEye : faEyeSlash} onClick={()=>{toggleEye(1)}}/>
+                </Password>
+              </>
+            }
+            <Button onClick={signUp}>{initialMode ? "가입" : "수정"}</Button>
           </SignUp>
         </Container>
       }
